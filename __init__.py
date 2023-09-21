@@ -1,3 +1,7 @@
-from .tongyi_qwen import Tongyi_v1
+from .qwen_llm import Qwen_v1
+from .qwen_chat_model import ChatQwen_v1
 
-__all__ = ["Tongyi_v1"]
+__all__ = [
+    "Qwen_v1",
+    "ChatQwen_v1",
+    ]

@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Dict, List, Optional, Iterator, AsyncIterator, Union, Set
+from typing import Any, Dict, List, Optional, Iterator, AsyncIterator, Set
 import logging
 
-from langchain.llms.base import BaseLLM, create_base_retry_decorator
+from langchain.llms.base import BaseLLM
 from langchain.pydantic_v1 import Field, root_validator
 from langchain.schema import Generation, LLMResult
 from langchain.utils import get_from_dict_or_env
@@ -12,28 +12,10 @@ from langchain.callbacks.manager import (
         CallbackManagerForLLMRun, AsyncCallbackManagerForLLMRun
     )
 
+from .commons import completion_with_retry
+from http import HTTPStatus
 
 logger = logging.getLogger(__name__)
-
-
-def _create_retry_decorator(
-    llm: Tongyi_v1,
-    run_manager: Optional[
-        Union[AsyncCallbackManagerForLLMRun, CallbackManagerForLLMRun]
-    ] = None,
-) -> Callable[[Any], Any]:
-    import dashscope
-
-    errors = [
-        # TODO: add more errors
-        dashscope.common.error.RequestFailure,
-        dashscope.common.error.InvalidInput,
-        dashscope.common.error.ModelRequired,
-    ]
-    
-    return create_base_retry_decorator(
-        error_types=errors, max_retries=llm.max_retries, run_manager=run_manager
-    )
 
 
 def update_token_usage(
@@ -56,27 +38,8 @@ def _stream_response_to_generation_chunk(
         text=stream_response["output"]["choices"][0]["message"]["content"],
         generation_info=dict(
             finish_reason=stream_response["output"]["choices"][0].get("finish_reason", None),
-            # TODO: 日志概率？？ 待确定该字段的作用， dashscope 好像没有这个字段
-            logprobs=stream_response["output"]["choices"][0].get("logprobs", None),
         ),
     )
-
-
-def completion_with_retry(
-    llm: Tongyi_v1,
-    run_manager: Optional[CallbackManagerForLLMRun] = None,
-    **kwargs: Any
-) -> Any:
-    """Use tenacity to retry the completion call."""
-    retry_decorator = _create_retry_decorator(llm)
-
-    @retry_decorator
-    def _completion_with_retry(**_kwargs: Any) -> Any:
-        _kwargs["stream"] = True
-
-        return llm.client.call(**_kwargs)
-
-    return _completion_with_retry(**kwargs)
 
 
 class BaseDashScope(BaseLLM):
@@ -156,7 +119,7 @@ class BaseDashScope(BaseLLM):
     @property
     def _llm_type(self) -> str:
         """Return type of llm."""
-        return "dashscope"
+        return "qwen"
         
     def _stream(
         self,
@@ -166,28 +129,27 @@ class BaseDashScope(BaseLLM):
         **kwargs: Any,
     ) -> Iterator[GenerationChunk]:
         params: Dict[str, Any] = {
-            **{"model": self.model_name},
+            # **{"model": self.model_name},
             **self._default_params,
             **kwargs,
         }
         params["stream"] = True
-        # return completion_with_retry(
-        #         self, prompt=prompt, run_manager=run_manager, **params
-        # )
-        print("params: -----", params)
+
         for stream_resp in completion_with_retry(self, prompt=prompt, run_manager=run_manager, **params):
-            print("*"*60)
-            chunk = _stream_response_to_generation_chunk(stream_resp)
-            yield chunk
-            if run_manager:
-                run_manager.on_llm_new_token(
-                    chunk.text,
-                    chunk=chunk,
-                    verbose=self.verbose,
-                    logprobs=chunk.generation_info["logprobs"]
-                    if chunk.generation_info
-                    else None,
-                )
+            if stream_resp.status_code == HTTPStatus.OK:
+                chunk = _stream_response_to_generation_chunk(stream_resp)
+                yield chunk
+                if run_manager:
+                    run_manager.on_llm_new_token(
+                        chunk.text,
+                        chunk=chunk,
+                        verbose=self.verbose,
+                        logprobs=chunk.generation_info["logprobs"]
+                        if chunk.generation_info
+                        else None,
+                    )
+            else:
+                logger.warning("http request failed: code: %s", stream_resp.status_code)
 
     def _astream(
         self,
@@ -218,7 +180,7 @@ class BaseDashScope(BaseLLM):
             if len(prompts) > 1:
                 raise ValueError("Cannot stream results with multiple prompts.")
             generation: Optional[GenerationChunk] = None
-            for chunk in self._stream(prompts[0], stop, run_manager, **kwargs):
+            for chunk in self._stream(prompts[0], stop, run_manager, **params):
                 if generation is None:
                     generation = chunk
                 else:
@@ -283,6 +245,6 @@ class BaseDashScope(BaseLLM):
         return LLMResult(generations=generations, llm_output=llm_output)
 
 
-class Tongyi_v1(BaseDashScope):
-    def __new__(cls, **data: Any) -> Tongyi_v1:
+class Qwen_v1(BaseDashScope):
+    def __new__(cls, **data: Any) -> Qwen_v1:
         return super().__new__(cls, **data)
