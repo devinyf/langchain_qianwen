@@ -28,19 +28,18 @@ def completion_with_retry(
         print("kwargs: ", _kwargs)
 
         resp = llm_model.client.call(**_kwargs)
+        print("<<- response: ", resp)
         if resp.status_code == HTTPStatus.OK:
-            print("<<- response: ", resp)
+            pass
         elif resp.status_code == HTTPStatus.BAD_REQUEST and "contain inappropriate content" in resp.message:
             resp.status_code = HTTPStatus.OK
             resp.output = {
-                "choices": [{"message": {"role": "assistant", "content": "Input data may contain inappropriate content.🐶"}}]
+                "choices": [{"finish_reason": "stop", "message": {"role": "assistant", "content": "Input data may contain inappropriate content.🐶"}}]
             }
             resp.usage = {"output_tokens": 0, "input_tokens": 0}
         else:
             # TODO: error handling
-            print("<<- http request failed: %s", resp)
-        # print("#"*60)
-        # print("resp: ", resp)
+            print("<<- http request failed: %s", resp.http_status)
         return resp
 
     return _completion_with_retry(**kwargs)
