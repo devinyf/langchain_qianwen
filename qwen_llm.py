@@ -200,11 +200,15 @@ class BaseDashScope(BaseLLM):
         else:
             response = completion_with_retry(
                 self,
-                prompt=prompts,
+                prompt=prompts[0],
                 run_manager=run_manager,
                 **params,
             )
-            choices.extend(response["output"]["choices"])
+            for v in response["output"]["choices"]:
+                choices.append({
+                    "text": v["message"]["content"],
+                    "finish_reason": v["finish_reason"]
+                })
             update_token_usage(_keys, response, token_usage)
 
         return self.create_llm_result(choices, prompts, token_usage)
@@ -226,8 +230,8 @@ class BaseDashScope(BaseLLM):
         generations = []
         for i, _ in enumerate(prompts):
             sub_choices = choices[i * self.n: (i + 1) * self.n]
-            print(choices)
-            print(sub_choices)
+            # print(choices)
+            # print(sub_choices)
             
             generations.append(
                 [

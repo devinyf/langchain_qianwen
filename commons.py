@@ -3,11 +3,15 @@ from langchain.callbacks.manager import (
     )
 from langchain.llms.base import create_base_retry_decorator
 
-# from .qwen_llm import Qwen_v1
-# from .qwen_chat_model import ChatQwen_v1
 from langchain.llms.base import BaseLLM
 from langchain.chat_models.base import BaseChatModel
+
+import logging
+from http import HTTPStatus
+
 from typing import Optional, Union, Callable, Any
+
+logger = logging.getLogger(__name__)
 
 
 def completion_with_retry(
@@ -20,9 +24,24 @@ def completion_with_retry(
 
     @retry_decorator
     def _completion_with_retry(**_kwargs: Any) -> Any:
-        # _kwargs["stream"] = True
+        print("#"*60)
+        print("kwargs: ", _kwargs)
 
-        return llm_model.client.call(**_kwargs)
+        resp = llm_model.client.call(**_kwargs)
+        if resp.status_code == HTTPStatus.OK:
+            print("<<- response: ", resp)
+        elif resp.status_code == HTTPStatus.BAD_REQUEST and "contain inappropriate content" in resp.message:
+            resp.status_code = HTTPStatus.OK
+            resp.output = {
+                "choices": [{"message": {"role": "assistant", "content": "Input data may contain inappropriate content.🐶"}}]
+            }
+            resp.usage = {"output_tokens": 0, "input_tokens": 0}
+        else:
+            # TODO: error handling
+            print("<<- http request failed: %s", resp)
+        # print("#"*60)
+        # print("resp: ", resp)
+        return resp
 
     return _completion_with_retry(**kwargs)
 

@@ -39,3 +39,23 @@ if __name__ == "__main__":
 
     chat([HumanMessage(content="介绍一下 Golang")])
 ```
+#### 使用 agent 增加网络查询功能
+```py
+from langchain.agents import load_tools, AgentType, initialize_agent
+from tongyi_qwen_langchain import Qwen_v1
+
+if __name__ == "__main__":
+    llm = Qwen_v1(
+        ##经测试只有 plus 模型才能正常使用 agent
+        model_name="qwen-plus",
+    )
+    ## 需要去 serpapi 官网申请一个 api_key
+    tool_names = ["serpapi"]
+    tools = load_tools(tool_names)
+
+    agent = initialize_agent(tools=tools,
+                             llm=llm,
+                             agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
+                             verbose=True)
+    agent.run("深圳今天出门用带雨伞吗?")
+```

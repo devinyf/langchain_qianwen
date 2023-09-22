@@ -132,7 +132,7 @@ class ChatQwen_v1(BaseChatModel):
             if output is None:
                 # Happens in streaming
                 continue
-            token_usage = output["usage"]
+            token_usage = output.get("token_usage", {})
             for k, v in token_usage.items():
                 if k in overall_token_usage:
                     overall_token_usage[k] += v
@@ -192,7 +192,7 @@ class ChatQwen_v1(BaseChatModel):
             message_dicts = self._create_message_dicts(messages, stop)
 
             response = completion_with_retry(
-                messages=message_dicts, run_manager=run_manager, **params
+                self, messages=message_dicts, run_manager=run_manager, **params
             )
 
             return self._create_chat_result(response)
@@ -205,15 +205,28 @@ class ChatQwen_v1(BaseChatModel):
 
     def _create_chat_result(self, response: Mapping[str, Any]) -> ChatResult:
         generations = []
-        for res in response["output"]["choices"]:
-            message = convert_dict_to_message(res["message"])
+        llm_output = {}
+        if response.status_code == HTTPStatus.OK:
+            for res in response["output"]["choices"]:
+                message = convert_dict_to_message(res["message"])
+                gen = ChatGeneration(
+                    message=message,
+                    generation_info=dict(finish_reason=res.get("finish_reason")),
+                )
+                generations.append(gen)
+            token_usage = response.get("usage", {})
+            llm_output = {"token_usage": token_usage, "model_name": self.model_name}
+        else:
+            # TODO: error handling
+            failed_msg = {"role": "assistant", "content": "Sorry, I don't know how to answer that."}
+            message = convert_dict_to_message(failed_msg)
             gen = ChatGeneration(
                 message=message,
-                generation_info=dict(finish_reason=res.get("finish_reason")),
+                generation_info=dict({"finish_reason": "stop"}),
             )
             generations.append(gen)
-        token_usage = response.get("usage", {})
-        llm_output = {"token_usage": token_usage, "model_name": self.model_name}
+            # logger.error("resp status err: ", response.status_code)
+            llm_output = {"token_usage": {"input_tokens": 0, "output_tokens": 0}, "model_name": self.model_name}
         return ChatResult(generations=generations, llm_output=llm_output)
 
     @property
