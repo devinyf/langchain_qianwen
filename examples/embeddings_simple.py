@@ -51,7 +51,7 @@ if __name__ == "__main__":
     )
 
     # 持久化数据到 chroma(开源向量存储引擎)
-    persist_data_to_chroma(embeddings, persist_directory)
+    # persist_data_to_chroma(embeddings, persist_directory)
 
     # 使用 llm 检索向量文本中的信息
     query = "文中工厂模式的例子有哪些??"
