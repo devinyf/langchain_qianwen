@@ -7,7 +7,7 @@
 #### llms
 ```py
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
-from tongyi_qwen_langchain import Qwen_v1
+from langchain_qianwen import Qwen_v1
 
 
 if __name__ == "__main__":
@@ -24,7 +24,7 @@ if __name__ == "__main__":
 #### chat_models
 ```py
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
-from tongyi_qwen_langchain import ChatQwen_v1
+from langchain_qianwen import ChatQwen_v1
 from langchain.schema import (
     HumanMessage,
 )
@@ -42,7 +42,7 @@ if __name__ == "__main__":
 #### 使用 agent 增加网络查询功能
 ```py
 from langchain.agents import load_tools, AgentType, initialize_agent
-from tongyi_qwen_langchain import Qwen_v1
+from langchain_qianwen import Qwen_v1
 
 if __name__ == "__main__":
     llm = Qwen_v1(
@@ -68,7 +68,7 @@ from langchain.text_splitter import CharacterTextSplitter
 from langchain.chains import RetrievalQA
 from langchain.document_loaders import DirectoryLoader
 
-from tongyi_qwen_langchain import Qwen_v1
+from langchain_qianwen import Qwen_v1
 
 if __name__ == "__main__":
     llm = Qwen_v1(

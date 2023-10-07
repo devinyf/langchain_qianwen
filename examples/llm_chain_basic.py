@@ -1,7 +1,7 @@
 from langchain import PromptTemplate
 from langchain.chains import LLMChain
 
-from tongyi_qwen_langchain import ChatQwen_v1
+from langchain_qianwen import ChatQwen_v1
 
 information_inappropriate = r"""
 姚明（Yao Ming），男，汉族，无党派人士，1980年9月12日出生于上海市徐汇区，祖籍江苏省苏州市吴江区震泽镇，前中国职业篮球运动员，司职中锋，现任亚洲篮球联合会主席、中国篮球协会主席、中职联公司董事长兼总经理， [1-3]十三届全国青联副主席， [4] 改革先锋奖章获得者。 [5] 第十四届全国人大代表 [108] [111] 。

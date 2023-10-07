@@ -1,5 +1,5 @@
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
-from tongyi_qwen_langchain import Qwen_v1
+from langchain_qianwen import Qwen_v1
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 from langchain.agents import load_tools, AgentType, initialize_agent
-from tongyi_qwen_langchain import Qwen_v1
+from langchain_qianwen import Qwen_v1
 
 if __name__ == "__main__":
     llm = Qwen_v1(

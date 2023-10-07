@@ -7,7 +7,7 @@ from langchain.chains import RetrievalQA
 from langchain.document_loaders import DirectoryLoader
 from langchain.schema.language_model import BaseLanguageModel
 
-from tongyi_qwen_langchain import Qwen_v1
+from langchain_qianwen import Qwen_v1
 
 
 def persist_data_to_chroma(embeddings: Embeddings, persist_directory: str):

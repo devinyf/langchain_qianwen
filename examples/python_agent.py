@@ -2,7 +2,7 @@ from langchain.agents import AgentType
 from langchain.agents.agent_toolkits import create_python_agent
 from langchain.tools import PythonREPLTool
 
-from tongyi_qwen_langchain import Qwen_v1
+from langchain_qianwen import Qwen_v1
 
 
 if __name__ == "__main__":

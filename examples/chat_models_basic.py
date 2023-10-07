@@ -1,5 +1,5 @@
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
-from tongyi_qwen_langchain import ChatQwen_v1
+from langchain_qianwen import ChatQwen_v1
 from langchain.schema import (
     HumanMessage,
 )
