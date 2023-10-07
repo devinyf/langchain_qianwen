@@ -3,6 +3,10 @@
 参考借鉴 openai langchain 的实现 
 目前仅用于个人学习
 
+```
+pip install langchain-qianwen
+```
+
 #### llms
 ```py
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
