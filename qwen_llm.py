@@ -12,7 +12,7 @@ from langchain.callbacks.manager import (
         CallbackManagerForLLMRun, AsyncCallbackManagerForLLMRun
     )
 
-from .commons import completion_with_retry
+from .commons import completion_with_retry, response_text_format, response_handler
 from http import HTTPStatus
 
 logger = logging.getLogger(__name__)
@@ -135,8 +135,10 @@ class BaseDashScope(BaseLLM):
         }
         params["stream"] = True
 
+        text_cursor = 0
         for stream_resp in completion_with_retry(self, prompt=prompt, run_manager=run_manager, **params):
             if stream_resp.status_code == HTTPStatus.OK:
+                stream_resp, text_cursor = response_text_format(stream_resp, text_cursor)
                 chunk = _stream_response_to_generation_chunk(stream_resp)
                 yield chunk
                 if run_manager:
@@ -144,9 +146,6 @@ class BaseDashScope(BaseLLM):
                         chunk.text,
                         chunk=chunk,
                         verbose=self.verbose,
-                        logprobs=chunk.generation_info["logprobs"]
-                        if chunk.generation_info
-                        else None,
                     )
             else:
                 logger.warning("http request failed: code: %s", stream_resp.status_code)
@@ -190,11 +189,6 @@ class BaseDashScope(BaseLLM):
                 {
                     "text": generation.text,
                     "finish_reason": generation.generation_info.get("finish_reason")
-                    if generation.generation_info
-                    else None,
-                    "logprobs": generation.generation_info.get("logprobs")
-                    if generation.generation_info
-                    else None,
                 }
             )
         else:
@@ -204,6 +198,9 @@ class BaseDashScope(BaseLLM):
                 run_manager=run_manager,
                 **params,
             )
+
+            response = response_handler(response)
+
             for v in response["output"]["choices"]:
                 choices.append({
                     "text": v["message"]["content"],
@@ -239,7 +236,6 @@ class BaseDashScope(BaseLLM):
                         text=choice["text"],
                         generation_info=dict(
                             finish_reason=choice.get("finish_reason"),
-                            logprobs=choice.get("logprobs"),
                         ),
                     )
                     for choice in sub_choices

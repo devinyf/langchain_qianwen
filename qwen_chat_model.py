@@ -21,7 +21,7 @@ from langchain.schema.messages import (
 from langchain.adapters.openai import convert_dict_to_message, convert_message_to_dict
 
 # from .commons import _create_retry_decorator
-from .commons import completion_with_retry
+from .commons import completion_with_retry, response_text_format, response_handler
 
 from typing import Dict, Any, Optional, List, Iterator, Tuple, Mapping
 
@@ -154,10 +154,13 @@ class ChatQwen_v1(BaseChatModel):
             **kwargs,
             "stream": True,
         }
+        text_cursor = 0
         for stream_resp in completion_with_retry(self, messages=message_dicts, run_manager=run_manager, **params):
             if stream_resp.status_code == HTTPStatus.OK:
                 if stream_resp["output"]["choices"] and len(stream_resp["output"]["choices"]) == 0:
                     continue
+
+                stream_resp, text_cursor = response_text_format(stream_resp, text_cursor)
                 chat_chunk = _stream_response_to_chat_generation_chunk(stream_resp)
                 yield chat_chunk
                 if run_manager:
@@ -195,6 +198,7 @@ class ChatQwen_v1(BaseChatModel):
                 self, messages=message_dicts, run_manager=run_manager, **params
             )
 
+            response = response_handler(response)
             return self._create_chat_result(response)
 
     def _create_message_dicts(
