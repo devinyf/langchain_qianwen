@@ -1,3 +1,19 @@
+.DS_Store
+
+# 忽略 Python 编译文件
 __pycache__/
 *.pyc
-.DS_Store
+
+# 忽略 Python 日志文件
+*.log
+
+# 忽略 Python 包文件
+*.egg-info/
+dist/
+build/
+*.egg
+*.whl
+*.tar.gz
+
+# 忽略虚拟环境目录
+venv/
