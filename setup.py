@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='langchain_qianwen',
-    version='0.1.3',
+    version='0.1.5',
     author='Devin YF',
     author_email='dyfsquall@qq.com',
     description='Tongyi Qianwen Langchain adapter',

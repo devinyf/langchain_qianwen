@@ -12,7 +12,7 @@ from langchain.callbacks.manager import (
         CallbackManagerForLLMRun, AsyncCallbackManagerForLLMRun
     )
 
-from .commons import completion_with_retry, response_text_format, response_handler
+from .commons import completion_with_retry, acompletion_with_retry, response_text_format, response_handler
 from http import HTTPStatus
 
 logger = logging.getLogger(__name__)
@@ -150,15 +150,33 @@ class BaseDashScope(BaseLLM):
             else:
                 logger.warning("http request failed: code: %s", stream_resp.status_code)
 
-    def _astream(
+    async def _astream(
         self,
         prompt: str,
         stop: Optional[List[str]] = None,
         run_manager: Optional[AsyncCallbackManagerForLLMRun] = None,
         **kwargs: Any,
     ) -> AsyncIterator[GenerationChunk]:
-        # TODO: ...
-        raise NotImplementedError()
+        params: Dict[str, Any] = {
+            # **{"model": self.model_name},
+            **self._default_params,
+            **kwargs,
+        }
+        params["stream"] = True
+        text_cursor = 0
+        async for stream_resp in await acompletion_with_retry(self, prompt=prompt, run_manager=run_manager, **params):
+            if stream_resp.status_code == HTTPStatus.OK:
+                stream_resp, text_cursor = response_text_format(stream_resp, text_cursor)
+                chunk = _stream_response_to_generation_chunk(stream_resp)
+                yield chunk
+                if run_manager:
+                    await run_manager.on_llm_new_token(
+                        chunk.text,
+                        chunk=chunk,
+                        verbose=self.verbose,
+                    )
+            else:
+                logger.warning("http request failed: code: %s", stream_resp.status_code)
 
     def _generate(
         self,
@@ -207,7 +225,6 @@ class BaseDashScope(BaseLLM):
                     "finish_reason": v["finish_reason"]
                 })
             update_token_usage(_keys, response, token_usage)
-
         return self.create_llm_result(choices, prompts, token_usage)
     
     async def _agenerate(
@@ -218,7 +235,47 @@ class BaseDashScope(BaseLLM):
         **kwargs: Any,
     ) -> LLMResult:
         """Run the LLM on the given prompts."""
-        raise NotImplementedError()
+        choices = []
+        token_usage: Dict[str, int] = {}
+        _keys = {"input_tokens", "output_tokens"}
+        params: Dict[str, Any] = {
+            **{"model": self.model_name},
+            **self._default_params,
+            **kwargs,
+        }
+        if self.streaming:
+            if len(prompts) > 1:
+                raise ValueError("Cannot stream results with multiple prompts.")
+            generation: Optional[GenerationChunk] = None
+            async for chunk in self._astream(prompts[0], stop, run_manager, **params):
+                if generation is None:
+                    generation = chunk
+                else:
+                    generation += chunk
+            assert generation is not None
+            choices.append(
+                {
+                    "text": generation.text,
+                    "finish_reason": generation.generation_info.get("finish_reason")
+                }
+            )
+        else:
+            response = await acompletion_with_retry(
+                self,
+                prompt=prompts[0],
+                run_manager=run_manager,
+                **params,
+            )
+
+            response = response_handler(response)
+
+            for v in response["output"]["choices"]:
+                choices.append({
+                    "text": v["message"]["content"],
+                    "finish_reason": v["finish_reason"]
+                })
+            update_token_usage(_keys, response, token_usage)
+        return self.create_llm_result(choices, prompts, token_usage)
 
     def create_llm_result(
         self, choices: Any, prompts: List[str], token_usage: Dict[str, int]

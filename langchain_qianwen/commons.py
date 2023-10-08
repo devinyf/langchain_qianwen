@@ -5,6 +5,7 @@ from langchain.llms.base import create_base_retry_decorator
 from langchain.llms.base import BaseLLM
 from langchain.chat_models.base import BaseChatModel
 from http import HTTPStatus
+import asyncio
 
 import logging
 
@@ -31,6 +32,31 @@ def completion_with_retry(
         return resp
 
     return _completion_with_retry(**kwargs)
+
+
+async def acompletion_with_retry(
+    llm_model: BaseLLM | BaseChatModel,
+    run_manager: Optional[AsyncCallbackManagerForLLMRun] = None,
+    **kwargs: Any
+) -> Any:
+    """Use tenacity to retry the completion call."""
+    retry_decorator = _create_retry_decorator(llm_model, run_manager=run_manager)
+    
+    @retry_decorator
+    async def _completion_with_retry(**_kwargs: Any) -> Any:
+        print("#"*60)
+        print("kwargs: ", _kwargs)
+        resp = llm_model.client.call(**kwargs)
+        print("<<- async resp: ", resp)
+        return async_generator(resp)
+
+    return await _completion_with_retry(**kwargs)
+
+
+async def async_generator(normal_generator):
+    for i in normal_generator:
+        await asyncio.sleep(0)
+        yield i
 
 
 def _create_retry_decorator(
