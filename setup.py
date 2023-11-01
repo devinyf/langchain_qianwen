@@ -2,13 +2,13 @@ from setuptools import setup, find_packages
 
 setup(
     name='langchain_qianwen',
-    version='0.1.5',
+    version='0.1.6',
     author='Devin YF',
     author_email='dyfsquall@qq.com',
     description='Tongyi Qianwen Langchain adapter',
     install_requires=[
-        'langchain==0.0.295',
-        'dashscope==1.9.0',
+        'langchain==0.0.327',
+        'dashscope==1.13.1',
     ],
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',

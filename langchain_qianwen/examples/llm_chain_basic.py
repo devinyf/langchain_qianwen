@@ -33,4 +33,4 @@ if __name__ == "__main__":
         prompt=summary_prompt_template,
     )
 
-    print(chain.run(information=information_ok))
+    print(chain.predict(information=information_ok))
