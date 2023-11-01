@@ -17,7 +17,7 @@ if __name__ == "__main__":
         verbose=True,
         )
 
-    # 编写python脚本生成 知乎二维码
+    # 查询 csv 文件中的信息
     csv_agent_executer.run(
         # """which writer wrote the most episodes? includes the partial participation how many episodes did he write?"""
         """print seasons ascending order of the number of episodes in each season"""
