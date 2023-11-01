@@ -66,7 +66,7 @@ class ChatQwen_v1(BaseChatModel):
         return True
 
     client: Any = None
-    model_name: str = Field(default="qwen-v1", alias="model"),
+    model_name: str = Field(default="qwen-turbo", alias="model"),
     """Model name to use."""
     temperature: float = 0.7
     """What sampling temperature to use."""

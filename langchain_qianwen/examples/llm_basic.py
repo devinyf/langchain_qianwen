@@ -4,7 +4,7 @@ from langchain_qianwen import Qwen_v1
 
 if __name__ == "__main__":
     llm = Qwen_v1(
-        model_name="qwen-v1",
+        model_name="qwen-turbo",
         streaming=True,
         callbacks=[StreamingStdOutCallbackHandler()],
         )

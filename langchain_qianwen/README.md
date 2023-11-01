@@ -3,6 +3,15 @@
 参考借鉴 openai langchain 的实现 
 目前仅用于个人学习
 
+前置条件：
+1. 安装 langchain [langchain文档](https://python.langchain.com/docs/get_started/installation)
+2. 在阿里云 [开通 DashScope 并创建API-KEY](https://help.aliyun.com/zh/dashscope/developer-reference/activate-dashscope-and-create-an-api-key)
+3. 设置 api_key 环境变量 `export DASHSCOPE_API_KEY="YOUR_DASHSCOPE_API_KEY"`
+
+```
+pip install langchain-qianwen
+```
+
 #### llms
 ```py
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
@@ -11,7 +20,7 @@ from langchain_qianwen import Qwen_v1
 
 if __name__ == "__main__":
     llm = Qwen_v1(
-        model_name="qwen-v1",
+        model_name="qwen-turbo",
         streaming=True,
         callbacks=[StreamingStdOutCallbackHandler()],
         )
@@ -30,7 +39,7 @@ from langchain.schema import (
 
 if __name__ == "__main__":
     chat = ChatQwen_v1(
-        model_name="qwen-v1",
+        model_name="qwen-turbo",
         streaming=True,
         callbacks=[StreamingStdOutCallbackHandler()],
     )
@@ -95,3 +104,5 @@ if __name__ == "__main__":
     print(rsp)
 
 ```
+
+更多使用案例查看和 examples 目录

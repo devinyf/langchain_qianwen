@@ -6,7 +6,7 @@ from langchain.schema import (
 
 if __name__ == "__main__":
     chat = ChatQwen_v1(
-        model_name="qwen-v1",
+        model_name="qwen-turbo",
         streaming=True,
         callbacks=[StreamingStdOutCallbackHandler()],
     )

@@ -3,6 +3,11 @@
 参考借鉴 openai langchain 的实现 
 目前仅用于个人学习
 
+前置条件：
+1. 安装 langchain [langchain文档](https://python.langchain.com/docs/get_started/installation)
+2. 在阿里云 [开通 DashScope 并创建API-KEY](https://help.aliyun.com/zh/dashscope/developer-reference/activate-dashscope-and-create-an-api-key)
+3. 设置 api_key 环境变量 `export DASHSCOPE_API_KEY="YOUR_DASHSCOPE_API_KEY"`
+
 ```
 pip install langchain-qianwen
 ```
@@ -15,12 +20,12 @@ from langchain_qianwen import Qwen_v1
 
 if __name__ == "__main__":
     llm = Qwen_v1(
-        model_name="qwen-v1",
+        model_name="qwen-turbo",
         streaming=True,
         callbacks=[StreamingStdOutCallbackHandler()],
         )
 
-    question = "你好, 帮忙解释一下 Hello World 是什么意思"
+    question = "你好, 解释一下 Hello World 是什么意思"
     llm(question)
 ```
 
@@ -34,7 +39,7 @@ from langchain.schema import (
 
 if __name__ == "__main__":
     chat = ChatQwen_v1(
-        model_name="qwen-v1",
+        model_name="qwen-turbo",
         streaming=True,
         callbacks=[StreamingStdOutCallbackHandler()],
     )
@@ -42,14 +47,13 @@ if __name__ == "__main__":
     chat([HumanMessage(content="举例说明一下 PHP 为什么是世界上最好的语言")])
 ```
 
-#### 使用 agent 增加网络查询功能
+#### 使用 agent 增加网络搜索功能
 ```py
 from langchain.agents import load_tools, AgentType, initialize_agent
 from langchain_qianwen import Qwen_v1
 
 if __name__ == "__main__":
     llm = Qwen_v1(
-        ##经测试只有 plus 模型才能正常使用 agent
         model_name="qwen-plus",
     )
     ## 需要去 serpapi 官网申请一个 api_key
@@ -60,7 +64,7 @@ if __name__ == "__main__":
                              llm=llm,
                              agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
                              verbose=True)
-    agent.run("最近在福岛海滩上发现哥斯拉了吗?")
+    agent.run("今天北京的天气怎么样?")
 ```
 
 #### 使用 embedding 提取文档中的信息
@@ -99,3 +103,5 @@ if __name__ == "__main__":
     print(rsp)
 
 ```
+
+更多使用案例请查看 examples 目录
