@@ -6,7 +6,7 @@ import logging
 from langchain.chat_models.base import BaseChatModel
 from langchain.pydantic_v1 import Field, root_validator
 from langchain.callbacks.manager import (
-    CallbackManagerForLLMRun,
+    CallbackManagerForLLMRun, AsyncCallbackManagerForLLMRun
 )
 from langchain.utils import get_from_dict_or_env
 from langchain.schema import ChatResult, ChatGeneration
@@ -18,12 +18,17 @@ from langchain.schema.messages import (
     SystemMessageChunk,
     HumanMessageChunk,
 )
-from langchain.adapters.openai import convert_dict_to_message, convert_message_to_dict
+from langchain.adapters.openai import (
+        convert_dict_to_message, convert_message_to_dict
+    )
+
 
 # from .commons import _create_retry_decorator
-from .commons import completion_with_retry, response_text_format, response_handler
+from .commons import (
+    completion_with_retry, response_text_format, response_handler)
 
-from typing import Dict, Any, Optional, List, Iterator, Tuple, Mapping
+from typing import (Dict, Any, Optional, List, 
+                    Iterator, Tuple, Mapping, AsyncIterator)
 
 logger = logging.getLogger(__name__)
 
@@ -200,6 +205,31 @@ class ChatQwen_v1(BaseChatModel):
 
             response = response_handler(response)
             return self._create_chat_result(response)
+
+    def _astream(
+        self,
+        messages: List[BaseMessage],
+        stop: Optional[List[str]] = None,
+        run_manager: Optional[AsyncCallbackManagerForLLMRun] = None,
+        **kwargs: Any,
+    ) -> AsyncIterator[ChatGenerationChunk]:
+        # TODO: Implement later
+        raise NotImplementedError()
+
+
+    async def _agenerate(
+        self,
+        messages: List[BaseMessage],
+        stop: Optional[List[str]] = None,
+        run_manager: Optional[AsyncCallbackManagerForLLMRun] = None,
+        **kwargs: Any,
+    ) -> ChatResult:
+        """Top Level call"""
+        # TODO: Implement later
+        return await asyncio.get_running_loop().run_in_executor(
+            None, partial(self._generate, **kwargs), messages, stop, run_manager
+        )
+
 
     def _create_message_dicts(
         self, messages: List[BaseMessage], stop: Optional[List[str]]
