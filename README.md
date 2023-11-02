@@ -12,21 +12,45 @@
 pip install langchain-qianwen
 ```
 
-#### llms
+#### 使用 async callback handler
+p.s. 目前仅 llm (Qwen_v1) 模型可以使用 AsyncIteratorCallbackHandler, chatmodel(ChatQwen_v1) 还未做更新
 ```py
-from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
+from langchain.callbacks.streaming_aiter import AsyncIteratorCallbackHandler
 from langchain_qianwen import Qwen_v1
+from langchain.chains import ConversationChain
+from langchain.memory import ConversationBufferMemory
+
+import asyncio
 
 
-if __name__ == "__main__":
+async def use_async_handler(input):
+    handler = AsyncIteratorCallbackHandler()
     llm = Qwen_v1(
         model_name="qwen-turbo",
         streaming=True,
-        callbacks=[StreamingStdOutCallbackHandler()],
-        )
+        callbacks=[handler], 
+    )
 
-    question = "你好, 解释一下 Hello World 是什么意思"
-    llm(question)
+    memory = ConversationBufferMemory()
+    chain = ConversationChain(
+        llm=llm,
+        memory=memory,
+        verbose=True,
+    )
+
+    asyncio.create_task(chain.apredict(input=input))
+
+    return handler.aiter()
+
+
+async def async_test():
+    async_gen = await use_async_handler("hello")
+    async for i in async_gen:
+        print(i)
+
+
+if __name__ == "__main__":
+    asyncio.run(async_test())
 ```
 
 #### chat_models
@@ -98,7 +122,7 @@ if __name__ == "__main__":
 
     # qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever, return_source_documents=True)
     qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever)
-    query = "文中的工厂模式使用例子有哪些??"
+    query = "文章中的工厂模式使用例子有哪些??"
     rsp = qa.run({"query": query})
     print(rsp)
 
