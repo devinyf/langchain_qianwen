@@ -7,8 +7,8 @@ setup(
     author_email='dyfsquall@qq.com',
     description='通义千问 Qianwen Langchain adapter',
     install_requires=[
-        'langchain==0.0.327',
-        'dashscope==1.13.1',
+        'langchain>=0.0.327',
+        'dashscope>=1.9.0',
     ],
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
