@@ -7,7 +7,7 @@ import asyncio
 
 import logging
 
-from typing import Optional, Union, Callable, Any
+from typing import Optional, Union, Callable, Any, AsyncGenerator
 
 logger = logging.getLogger(__name__)
 
@@ -32,16 +32,18 @@ def completion_with_retry(
     return _completion_with_retry(**kwargs)
 
 
+# 注意 该函数返回的类型为 <async_generator>
+# 仅用在 streaming 调用的 async for 循环中
 async def acompletion_with_retry(
     llm_model: BaseLLM | BaseChatModel,
     run_manager: Optional[AsyncCallbackManagerForLLMRun] = None,
     **kwargs: Any
-) -> Any:
+) -> AsyncGenerator:
     """Use tenacity to retry the completion call."""
     retry_decorator = _create_retry_decorator(llm_model, run_manager=run_manager)
 
     @retry_decorator
-    async def _completion_with_retry(**_kwargs: Any) -> Any:
+    async def _completion_with_retry(**_kwargs: Any) -> AsyncGenerator:
         print("#" * 60)
         print("kwargs: ", _kwargs)
         resp = llm_model.client.call(**kwargs)
@@ -93,7 +95,5 @@ def response_handler(response):
         }
         response.usage = {"output_tokens": 0, "input_tokens": 0}
     elif response.status_code != HTTPStatus.OK:
-        # TODO: error handling
-        print("<<- http request failed: %s", response.status_code)
-
+        raise ValueError(f"http request failed, code: {response.status_code}")
     return response

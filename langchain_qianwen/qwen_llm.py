@@ -260,7 +260,8 @@ class BaseDashScope(BaseLLM):
                 }
             )
         else:
-            response = await acompletion_with_retry(
+            # _agenerate 已经是 async 函数了，这里走同步逻辑
+            response = completion_with_retry(
                 self,
                 prompt=prompts[0],
                 run_manager=run_manager,
@@ -275,7 +276,8 @@ class BaseDashScope(BaseLLM):
                     "finish_reason": v["finish_reason"]
                 })
             update_token_usage(_keys, response, token_usage)
-        return self.create_llm_result(choices, prompts, token_usage)
+            result = self.create_llm_result(choices, prompts, token_usage)
+            return result
 
     def create_llm_result(
         self, choices: Any, prompts: List[str], token_usage: Dict[str, int]
