@@ -12,6 +12,28 @@
 pip install langchain-qianwen
 ```
 
+
+#### 支持 LCEL(LangChain Expression Language) 语法
+```py
+from langchain.prompts import PromptTemplate
+from langchain_qianwen import Qwen_v1
+
+if __name__ == "__main__":
+    jock_template = "给我讲个有关 {topic} 的笑话"
+    prompt = PromptTemplate.from_template(jock_template)
+
+    llm = Qwen_v1(
+        model_name="qwen-turbo",
+        temperature=0.18,
+        streaming=True,
+    )
+
+    chain = prompt | llm
+
+    for s in chain.stream({"topic": "产品经理"}):
+        print(s, end="", flush=True)
+```
+
 #### 使用 async callback handler
 p.s. 目前仅 llm (Qwen_v1) 模型可以使用 AsyncIteratorCallbackHandler, chatmodel(ChatQwen_v1) 还未做更新
 ```py

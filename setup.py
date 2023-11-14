@@ -2,10 +2,10 @@ from setuptools import setup, find_packages
 
 setup(
     name='langchain_qianwen',
-    version='0.1.7',
+    version='0.1.9',
     author='Devin YF',
     author_email='dyfsquall@qq.com',
-    description='Tongyi Qianwen Langchain adapter',
+    description='通义千问 Qianwen Langchain adapter',
     install_requires=[
         'langchain==0.0.327',
         'dashscope==1.13.1',

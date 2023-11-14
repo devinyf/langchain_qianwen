@@ -8,9 +8,7 @@ from langchain.pydantic_v1 import Field, root_validator
 from langchain.schema import Generation, LLMResult
 from langchain.utils import get_from_dict_or_env
 from langchain.schema.output import GenerationChunk
-from langchain.callbacks.manager import (
-        CallbackManagerForLLMRun, AsyncCallbackManagerForLLMRun
-    )
+from langchain.callbacks.manager import (CallbackManagerForLLMRun, AsyncCallbackManagerForLLMRun)
 
 from .commons import completion_with_retry, acompletion_with_retry, response_text_format, response_handler
 from http import HTTPStatus
@@ -129,11 +127,11 @@ class BaseDashScope(BaseLLM):
         **kwargs: Any,
     ) -> Iterator[GenerationChunk]:
         params: Dict[str, Any] = {
-            # **{"model": self.model_name},
             **self._default_params,
             **kwargs,
+            "model": self.model_name,
+            "stream": True,
         }
-        params["stream"] = True
 
         text_cursor = 0
         for stream_resp in completion_with_retry(self, prompt=prompt, run_manager=run_manager, **params):
@@ -161,8 +159,10 @@ class BaseDashScope(BaseLLM):
             # **{"model": self.model_name},
             **self._default_params,
             **kwargs,
+            "model": self.model_name,
+            "stream": True
         }
-        params["stream"] = True
+
         text_cursor = 0
         async for stream_resp in await acompletion_with_retry(self, prompt=prompt, run_manager=run_manager, **params):
             if stream_resp.status_code == HTTPStatus.OK:

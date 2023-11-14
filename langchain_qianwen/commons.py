@@ -1,6 +1,4 @@
-from langchain.callbacks.manager import (
-        CallbackManagerForLLMRun, AsyncCallbackManagerForLLMRun
-    )
+from langchain.callbacks.manager import (CallbackManagerForLLMRun, AsyncCallbackManagerForLLMRun)
 from langchain.llms.base import create_base_retry_decorator
 from langchain.llms.base import BaseLLM
 from langchain.chat_models.base import BaseChatModel
@@ -24,7 +22,7 @@ def completion_with_retry(
 
     @retry_decorator
     def _completion_with_retry(**_kwargs: Any) -> Any:
-        print("#"*60)
+        print("#" * 60)
         print("kwargs: ", _kwargs)
 
         resp = llm_model.client.call(**_kwargs)
@@ -41,10 +39,10 @@ async def acompletion_with_retry(
 ) -> Any:
     """Use tenacity to retry the completion call."""
     retry_decorator = _create_retry_decorator(llm_model, run_manager=run_manager)
-    
+
     @retry_decorator
     async def _completion_with_retry(**_kwargs: Any) -> Any:
-        print("#"*60)
+        print("#" * 60)
         print("kwargs: ", _kwargs)
         resp = llm_model.client.call(**kwargs)
         print("<<- async resp: ", resp)
@@ -73,7 +71,7 @@ def _create_retry_decorator(
         dashscope.common.error.InvalidInput,
         dashscope.common.error.ModelRequired,
     ]
-    
+
     return create_base_retry_decorator(
         error_types=errors, max_retries=llm_model.max_retries, run_manager=run_manager
     )

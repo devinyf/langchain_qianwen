@@ -18,16 +18,15 @@ from langchain.schema.messages import (
     SystemMessageChunk,
     HumanMessageChunk,
 )
-from langchain.adapters.openai import (
-        convert_dict_to_message, convert_message_to_dict
-    )
+from langchain.adapters.openai import (convert_dict_to_message, convert_message_to_dict)
 
+import asyncio
+from functools import partial
 
-# from .commons import _create_retry_decorator
 from .commons import (
     completion_with_retry, response_text_format, response_handler)
 
-from typing import (Dict, Any, Optional, List, 
+from typing import (Dict, Any, Optional, List,
                     Iterator, Tuple, Mapping, AsyncIterator)
 
 logger = logging.getLogger(__name__)
@@ -37,13 +36,12 @@ def _stream_response_to_chat_generation_chunk(
     stream_response: Dict[str, Any],
 ) -> ChatGenerationChunk:
     """Convert a stream response to a chat generation chunk."""
-    # TODO:...
     msg = stream_response["output"]["choices"][0]["message"]
     role = msg["role"]
     text = msg["content"]
 
     msg_chunk = None
-    
+
     if role == "user":
         msg_chunk = HumanMessageChunk(content=text)
     elif role == "assistant":
@@ -52,7 +50,7 @@ def _stream_response_to_chat_generation_chunk(
         msg_chunk = SystemMessageChunk(content=text)
     else:
         msg_chunk = ChatMessageChunk(content=text, role=role)
-    
+
     return ChatGenerationChunk(
         message=msg_chunk,
         generation_info=dict(
@@ -154,10 +152,10 @@ class ChatQwen_v1(BaseChatModel):
     ) -> Iterator[ChatGenerationChunk]:
         message_dicts = self._create_message_dicts(messages, stop)
         params: Dict[str, Any] = {
-            **{"model": self.model_name},
             **self._default_params,
             **kwargs,
             "stream": True,
+            "model": self.model_name,
         }
         text_cursor = 0
         for stream_resp in completion_with_retry(self, messages=message_dicts, run_manager=run_manager, **params):
@@ -183,10 +181,11 @@ class ChatQwen_v1(BaseChatModel):
         """Top Level call"""
         print("_generate... message: ", messages)
         params: Dict[str, Any] = {
-            **{"model": self.model_name},
             **self._default_params,
             **kwargs,
+            "model": self.model_name,
         }
+
         if self.streaming:
             generation: Optional[ChatGenerationChunk] = None
             for chunk in self._stream(messages, stop, run_manager, **params):
@@ -216,7 +215,6 @@ class ChatQwen_v1(BaseChatModel):
         # TODO: Implement later
         raise NotImplementedError()
 
-
     async def _agenerate(
         self,
         messages: List[BaseMessage],
@@ -227,9 +225,12 @@ class ChatQwen_v1(BaseChatModel):
         """Top Level call"""
         # TODO: Implement later
         return await asyncio.get_running_loop().run_in_executor(
-            None, partial(self._generate, **kwargs), messages, stop, run_manager
+            None,
+            partial(self._generate, **kwargs),
+            messages,
+            stop,
+            run_manager
         )
-
 
     def _create_message_dicts(
         self, messages: List[BaseMessage], stop: Optional[List[str]]
@@ -267,7 +268,7 @@ class ChatQwen_v1(BaseChatModel):
     def _identifying_params(self) -> Dict[str, Any]:
         """Get the identifying parameters."""
         return {**{"model_name": self.model_name}, **self._default_params}
-    
+
     def _get_invocation_params(
         self, stop: Optional[List[str]] = None, **kwargs: Any
     ) -> Dict[str, Any]:
