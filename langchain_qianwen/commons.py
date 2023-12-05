@@ -26,7 +26,6 @@ def completion_with_retry(
         print("kwargs: ", _kwargs)
 
         resp = llm_model.client.call(**_kwargs)
-        print("<<- response: ", resp)
         return resp
 
     return _completion_with_retry(**kwargs)
@@ -54,9 +53,13 @@ async def acompletion_with_retry(
 
 
 async def async_generator(normal_generator):
-    for i in normal_generator:
-        await asyncio.sleep(0)
-        yield i
+    for v in normal_generator:
+        if v.status_code == HTTPStatus.OK:
+            await asyncio.sleep(0)
+            yield v
+        else:
+            print("async_generator HTTP-Err: ", v)
+            raise SystemError("http response Error: ", v.status_code)
 
 
 def _create_retry_decorator(

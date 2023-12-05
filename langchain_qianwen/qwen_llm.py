@@ -51,6 +51,7 @@ class BaseDashScope(BaseLLM):
         return True
 
     client: Any = None
+
     model_name: str = Field(default="qwen-turbo", alias="model"),
     """Model name to use."""
     temperature: float = 0.7
@@ -164,19 +165,28 @@ class BaseDashScope(BaseLLM):
         }
 
         text_cursor = 0
-        async for stream_resp in await acompletion_with_retry(self, prompt=prompt, run_manager=run_manager, **params):
-            if stream_resp.status_code == HTTPStatus.OK:
-                stream_resp, text_cursor = response_text_format(stream_resp, text_cursor)
-                chunk = _stream_response_to_generation_chunk(stream_resp)
-                yield chunk
-                if run_manager:
-                    await run_manager.on_llm_new_token(
-                        chunk.text,
-                        chunk=chunk,
-                        verbose=self.verbose,
-                    )
-            else:
-                logger.warning("http request failed: code: %s", stream_resp.status_code)
+
+        try:
+            async for stream_resp in await acompletion_with_retry(self, prompt=prompt, run_manager=run_manager, **params):
+                if stream_resp.status_code == HTTPStatus.OK:
+                    # print("stream_resp: ", stream_resp)
+                    stream_resp, text_cursor = response_text_format(stream_resp, text_cursor)
+                    chunk = _stream_response_to_generation_chunk(stream_resp)
+                    yield chunk
+                    if run_manager:
+                        await run_manager.on_llm_new_token(
+                            chunk.text,
+                            chunk=chunk,
+                            verbose=self.verbose,
+                        )
+                else:
+                    logger.warning("http request failed: code: %s", stream_resp.status_code)
+        except Exception as e:
+            print("_astream exception: ", e)
+            # raise e
+            return
+        finally:
+            print("_astream: over111")
 
     def _generate(
         self,
@@ -276,8 +286,8 @@ class BaseDashScope(BaseLLM):
                     "finish_reason": v["finish_reason"]
                 })
             update_token_usage(_keys, response, token_usage)
-            result = self.create_llm_result(choices, prompts, token_usage)
-            return result
+        result = self.create_llm_result(choices, prompts, token_usage)
+        return result
 
     def create_llm_result(
         self, choices: Any, prompts: List[str], token_usage: Dict[str, int]

@@ -1,4 +1,4 @@
-from langchain import PromptTemplate
+from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 
 from langchain_qianwen import ChatQwen_v1

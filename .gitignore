@@ -17,3 +17,4 @@ build/
 
 # 忽略虚拟环境目录
 venv/
+.vscode/

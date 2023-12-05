@@ -7,7 +7,9 @@ if __name__ == "__main__":
         model_name="qwen-turbo",
         streaming=True,
         callbacks=[StreamingStdOutCallbackHandler()],
-        )
+    )
 
-    question = "你好， 今天天气怎么样"
-    llm(question)
+    question = "你好, 讲个50字的笑话吧"
+    resp = llm(question)
+    print("type: ", type(resp))
+    print("resp: ", resp)
