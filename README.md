@@ -4,7 +4,7 @@
 目前在个人项目工具中使用
 
 #### Install 
-会同时安装 Langchain 和 Dashscope SDK
+pip 会同时安装依赖库: Langchain 和 Dashscope-SDK
 ```sh
 pip install langchain-qianwen
 ```
