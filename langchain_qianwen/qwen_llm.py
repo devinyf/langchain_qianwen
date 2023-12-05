@@ -167,7 +167,9 @@ class BaseDashScope(BaseLLM):
         text_cursor = 0
 
         try:
-            async for stream_resp in await acompletion_with_retry(self, prompt=prompt, run_manager=run_manager, **params):
+            async for stream_resp in await acompletion_with_retry(
+                self, prompt=prompt, run_manager=run_manager, **params
+            ):
                 if stream_resp.status_code == HTTPStatus.OK:
                     # print("stream_resp: ", stream_resp)
                     stream_resp, text_cursor = response_text_format(stream_resp, text_cursor)

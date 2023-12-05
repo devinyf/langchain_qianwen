@@ -1,16 +1,28 @@
 #### 灵积-通义千问 Langchain
 探索 通义千问 Api 在 langchain 中的使用
 参考借鉴 openai langchain 的实现 
-目前仅用于个人学习
+目前在个人项目工具中使用
 
-前置条件：
-1. 安装 langchain [langchain文档](https://python.langchain.com/docs/get_started/installation)
-2. 在阿里云 [开通 DashScope 并创建API-KEY](https://help.aliyun.com/zh/dashscope/developer-reference/activate-dashscope-and-create-an-api-key)
-3. 设置 api_key 环境变量 `export DASHSCOPE_API_KEY="YOUR_DASHSCOPE_API_KEY"`
-
-```
+#### Install 
+会同时安装 Langchain 和 Dashscope SDK
+```sh
 pip install langchain-qianwen
 ```
+
+Clone 项目 手动安装
+```sh
+git clone ... && cd langchain_qianwen
+pip install -r requirements.txt
+
+ # 建议运行 pytest 单元测试确认功能运行正常，防止依赖库出现 breaking change
+pip install pytest
+pytest
+```
+
+使用前置条件：
+1. 了解 Langchain [langchain文档](https://python.langchain.com/docs/get_started/installation)
+2. 在阿里云开发参考文档 [申请并创建API-KEY](https://help.aliyun.com/zh/dashscope/developer-reference/activate-dashscope-and-create-an-api-key)
+3. 设置 api_key 环境变量 `export DASHSCOPE_API_KEY="YOUR_DASHSCOPE_API_KEY"`
 
 
 #### 支持 LCEL(LangChain Expression Language) 语法
@@ -34,8 +46,9 @@ if __name__ == "__main__":
         print(s, end="", flush=True)
 ```
 
-#### 使用 async callback handler
-p.s. 目前仅 llm (Qwen_v1) 模型可以使用 AsyncIteratorCallbackHandler, chatmodel(ChatQwen_v1) 还未做更新
+#### 支持异步调用 async callback handler
+p.s. 目前 llm 模型 (Qwen_v1) 可以使用 AsyncIteratorCallbackHandler, 
+chatmodel(ChatQwen_v1 待更新 这个我还用不到...)
 ```py
 from langchain.callbacks.streaming_aiter import AsyncIteratorCallbackHandler
 from langchain_qianwen import Qwen_v1
@@ -150,4 +163,4 @@ if __name__ == "__main__":
 
 ```
 
-更多使用案例请查看 examples 目录
+更多使用请查看 langchain 官方文档 和 examples 目录

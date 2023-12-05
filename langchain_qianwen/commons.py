@@ -94,7 +94,8 @@ def response_handler(response):
     if response.status_code == HTTPStatus.BAD_REQUEST and "contain inappropriate content" in response.message:
         response.status_code = HTTPStatus.OK
         response.output = {
-            "choices": [{"finish_reason": "stop", "message": {"role": "assistant", "content": "Input data may contain inappropriate content.🐶"}}]
+            "choices": [{"finish_reason": "stop", "message": {
+                "role": "assistant", "content": "Input data may contain inappropriate content.🐶"}}]
         }
         response.usage = {"output_tokens": 0, "input_tokens": 0}
     elif response.status_code != HTTPStatus.OK:

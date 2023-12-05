@@ -8,8 +8,9 @@ from langchain.schema.runnable import RunnableParallel
 
 from mock_data import (mock_call_response, mock_streaming_generator,
                        MOCK_CALL_RESPONSE, MOCK_STREAMING_RESPONSE)
-import asyncio
+
 import sys
+import asyncio
 
 # 添加路径到sys.path
 LOCAL_PACKAGE_PATH = '../langchain_qianwen/'
@@ -85,9 +86,14 @@ class TestQwenChain(TestCase):
 
         with patch.object(llm, 'client') as mock_client:
             mock_client.call.return_value = mock_streaming_generator()
-            async_response = asyncio.run(_async_response(llm, handler))
 
-            assert async_response == MOCK_STREAMING_RESPONSE
+            chain = ConversationChain(
+                llm=llm,
+                verbose=True,
+            )
+
+            response = chain_return_async_final_response(chain, handler, "hello")
+            assert response == MOCK_STREAMING_RESPONSE
 
     def test_lcel_parallelism(self):
         template1 = "给我讲个有关 {topic} 的笑话"
@@ -112,21 +118,19 @@ class TestQwenChain(TestCase):
             assert response_dict["story_resp"] == MOCK_CALL_RESPONSE
         
 
-async def _async_response(llm, handler) -> str:
+def chain_return_async_final_response(chain, handler, content):
+    async_response = asyncio.run(_async_response(chain, handler, content))
+    return async_response
+ 
+
+async def _async_response(chain, handler, content) -> str:
+    async def _use_async_handler(chain, handler, content):
+        asyncio.create_task(chain.apredict(input=content))
+        return handler.aiter()
+
     response = ''
-    async_gen = await _use_async_handler(llm, handler, "hello")
+    async_gen = await _use_async_handler(chain, handler, content)
     async for i in async_gen:
         response += i
 
     return response
-
-
-async def _use_async_handler(llm, handler, content):
-    chain = ConversationChain(
-        llm=llm,
-        verbose=True,
-    )
-
-    asyncio.create_task(chain.apredict(input=content))
-
-    return handler.aiter()
