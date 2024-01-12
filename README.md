@@ -3,6 +3,13 @@
 参考借鉴 openai langchain 的实现 
 目前在个人项目工具中使用
 
+NOTE: langchian 已经带有了一个合并的 `Tongyi` 实现, 当时写这个项目的时候 Tongyi 的功能还不够完善, 
+不过随着后续的迭代应该已经没问题了 建议优先考虑通过以下方式使用
+```py
+from langchain_community.llms.tongyi import Tongyi
+from langchain_community.chat_models.tongyi import ChatTongyi
+```
+
 #### Install 
 pip 会同时安装依赖库: Langchain 和 Dashscope-SDK
 ```sh
