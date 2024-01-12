@@ -16,11 +16,11 @@ if __name__ == "__main__":
         tool=PythonREPLTool(),
         agent_type=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
         verbose=True,
-        )
+    )
 
     # 编写python脚本生成 知乎二维码
     python_agent_executer.run(
-        # follow the example code {GENERATE_QRCODE_TEMPLATE}, 
+        # follow the example code {GENERATE_QRCODE_TEMPLATE},
         """use qrcode library generate a ORcode that point to www.zhihu.com and save in current working directory.
         """
-        )
+    )

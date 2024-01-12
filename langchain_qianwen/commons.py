@@ -1,5 +1,5 @@
 from langchain.callbacks.manager import (CallbackManagerForLLMRun, AsyncCallbackManagerForLLMRun)
-from langchain.llms.base import create_base_retry_decorator
+from langchain_core.language_models.llms import create_base_retry_decorator
 from langchain.llms.base import BaseLLM
 from langchain.chat_models.base import BaseChatModel
 from http import HTTPStatus

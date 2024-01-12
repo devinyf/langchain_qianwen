@@ -11,7 +11,7 @@ async def use_async_handler(input):
     llm = Qwen_v1(
         model_name="qwen-turbo",
         streaming=True,
-        callbacks=[handler], 
+        callbacks=[handler],
     )
 
     memory = ConversationBufferMemory()

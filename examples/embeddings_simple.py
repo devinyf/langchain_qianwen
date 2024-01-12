@@ -46,9 +46,7 @@ if __name__ == "__main__":
     )
 
     persist_directory = "./vector_storage"
-    embeddings = DashScopeEmbeddings(
-            model="text-embedding-v1",
-    )
+    embeddings = DashScopeEmbeddings(model="text-embedding-v1")
 
     # 持久化数据到 chroma(开源向量存储引擎)
     # persist_data_to_chroma(embeddings, persist_directory)

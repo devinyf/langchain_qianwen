@@ -119,7 +119,7 @@ class BaseDashScope(BaseLLM):
     def _llm_type(self) -> str:
         """Return type of llm."""
         return "qwen"
-        
+
     def _stream(
         self,
         prompt: str,
@@ -238,7 +238,7 @@ class BaseDashScope(BaseLLM):
                 })
             update_token_usage(_keys, response, token_usage)
         return self.create_llm_result(choices, prompts, token_usage)
-    
+
     async def _agenerate(
         self,
         prompts: List[str],
@@ -300,7 +300,7 @@ class BaseDashScope(BaseLLM):
             sub_choices = choices[i * self.n: (i + 1) * self.n]
             # print(choices)
             # print(sub_choices)
-            
+
             generations.append(
                 [
                     Generation(
