@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='langchain_qianwen',
-    version='0.1.13',
+    version='0.1.14',
     author='Devin YF',
     author_email='dyfsquall@qq.com',
     description='通义千问 Qianwen Langchain adapter',
