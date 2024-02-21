@@ -184,11 +184,12 @@ class BaseDashScope(BaseLLM):
                 else:
                     logger.warning("http request failed: code: %s", stream_resp.status_code)
         except Exception as e:
-            print("_astream exception: ", e)
+            print("_astream exception error: ", e)
             # raise e
             return
         finally:
-            print("_astream: over111")
+            pass
+            # print("_astream: over")
 
     def _generate(
         self,
@@ -298,8 +299,6 @@ class BaseDashScope(BaseLLM):
         generations = []
         for i, _ in enumerate(prompts):
             sub_choices = choices[i * self.n: (i + 1) * self.n]
-            # print(choices)
-            # print(sub_choices)
 
             generations.append(
                 [

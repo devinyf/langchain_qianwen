@@ -22,8 +22,6 @@ def completion_with_retry(
 
     @retry_decorator
     def _completion_with_retry(**_kwargs: Any) -> Any:
-        print("#" * 60)
-        print("kwargs: ", _kwargs)
 
         resp = llm_model.client.call(**_kwargs)
         return resp
@@ -43,10 +41,7 @@ async def acompletion_with_retry(
 
     @retry_decorator
     async def _completion_with_retry(**_kwargs: Any) -> AsyncGenerator:
-        print("#" * 60)
-        print("kwargs: ", _kwargs)
         resp = llm_model.client.call(**kwargs)
-        print("<<- async resp: ", resp)
         return async_generator(resp)
 
     return await _completion_with_retry(**kwargs)

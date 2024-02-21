@@ -40,9 +40,6 @@ class ZeroShotAgentCN(ZeroShotAgent):
         template = "\n\n".join([prefix, tool_strings, format_instructions, suffix])
         if input_variables is None:
             input_variables = ["input", "agent_scratchpad"]
-        print(">"*60)
-        print(input_variables)
-        print(">"*60)
         return PromptTemplate(template=template, input_variables=input_variables)
 
     @classmethod

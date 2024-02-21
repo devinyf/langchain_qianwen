@@ -179,7 +179,6 @@ class ChatQwen_v1(BaseChatModel):
         **kwargs: Any,
     ) -> ChatResult:
         """Top Level call"""
-        print("_generate... message: ", messages)
         params: Dict[str, Any] = {
             **self._default_params,
             **kwargs,
