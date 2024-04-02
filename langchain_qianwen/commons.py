@@ -20,6 +20,9 @@ def completion_with_retry(
     """Use tenacity to retry the completion call."""
     retry_decorator = _create_retry_decorator(llm_model, run_manager=run_manager)
 
+    if llm_model.plugins:
+        kwargs["plugins"] = llm_model.plugins
+
     @retry_decorator
     def _completion_with_retry(**_kwargs: Any) -> Any:
 
@@ -75,6 +78,21 @@ def _create_retry_decorator(
     return create_base_retry_decorator(
         error_types=errors, max_retries=llm_model.max_retries, run_manager=run_manager
     )
+
+
+def response_plugin_format(stream_resp, cursor):
+    if stream_resp["output"]["choices"][0]["message"] is None:
+        stream_resp["output"]["choices"][0]["message"] = {}
+
+    text = ""
+    for message in stream_resp["output"]["choices"][0]["messages"]:
+        text += message["content"]
+
+    text = text[cursor:]
+    cursor += len(text)
+
+    stream_resp["output"]["choices"][0]["message"]["content"] = text
+    return stream_resp, cursor
 
 
 def response_text_format(stream_resp, cursor):

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Iterator, AsyncIterator, Set
+from typing import Any, Dict, List, Optional, Iterator, AsyncIterator, Set, Union
 import logging
 
 from langchain.llms.base import BaseLLM
@@ -10,7 +10,7 @@ from langchain.utils import get_from_dict_or_env
 from langchain.schema.output import GenerationChunk
 from langchain.callbacks.manager import (CallbackManagerForLLMRun, AsyncCallbackManagerForLLMRun)
 
-from .commons import completion_with_retry, acompletion_with_retry, response_text_format, response_handler
+from .commons import completion_with_retry, acompletion_with_retry, response_text_format, response_plugin_format, response_handler
 from http import HTTPStatus
 
 logger = logging.getLogger(__name__)
@@ -72,6 +72,8 @@ class BaseDashScope(BaseLLM):
     """Maximum number of retries to make when generating."""
     prefix_messages: List = Field(default_factory=list)
     """Series of messages for Chat input."""
+    plugins: Union[str, Dict[str, Any]] = None
+    """using plugins."""
 
     def __new__(cls, **data: Any) -> BaseDashScope:
         return super().__new__(cls)
@@ -137,7 +139,10 @@ class BaseDashScope(BaseLLM):
         text_cursor = 0
         for stream_resp in completion_with_retry(self, prompt=prompt, run_manager=run_manager, **params):
             if stream_resp.status_code == HTTPStatus.OK:
-                stream_resp, text_cursor = response_text_format(stream_resp, text_cursor)
+                if self.plugins:
+                    stream_resp, text_cursor = response_plugin_format(stream_resp, text_cursor)
+                else:
+                    stream_resp, text_cursor = response_text_format(stream_resp, text_cursor)
                 chunk = _stream_response_to_generation_chunk(stream_resp)
                 yield chunk
                 if run_manager:
@@ -172,7 +177,10 @@ class BaseDashScope(BaseLLM):
             ):
                 if stream_resp.status_code == HTTPStatus.OK:
                     # print("stream_resp: ", stream_resp)
-                    stream_resp, text_cursor = response_text_format(stream_resp, text_cursor)
+                    if self.plugins:
+                        stream_resp, text_cursor = response_plugin_format(stream_resp, text_cursor)
+                    else:
+                        stream_resp, text_cursor = response_text_format(stream_resp, text_cursor)
                     chunk = _stream_response_to_generation_chunk(stream_resp)
                     yield chunk
                     if run_manager:
@@ -233,10 +241,19 @@ class BaseDashScope(BaseLLM):
             response = response_handler(response)
 
             for v in response["output"]["choices"]:
-                choices.append({
-                    "text": v["message"]["content"],
-                    "finish_reason": v["finish_reason"]
-                })
+                if self.plugins:
+                    tmpText = ""
+                    for message in v["messages"]:
+                        tmpText += message["content"]
+                    choices.append({
+                        "text": tmpText,
+                        "finish_reason": v["finish_reason"]
+                    })
+                else:
+                    choices.append({
+                        "text": v["message"]["content"],
+                        "finish_reason": v["finish_reason"]
+                    })
             update_token_usage(_keys, response, token_usage)
         return self.create_llm_result(choices, prompts, token_usage)
 

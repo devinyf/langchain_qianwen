@@ -6,12 +6,12 @@ from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from mock_data import (mock_call_response, mock_streaming_generator,
                        MOCK_CALL_RESPONSE, MOCK_STREAMING_RESPONSE)
 
+from langchain_qianwen import Qwen_v1
+
 # 添加路径到sys.path
 LOCAL_PACKAGE_PATH = '../langchain_qianwen/'
 if LOCAL_PACKAGE_PATH not in sys.path:
     sys.path.append(LOCAL_PACKAGE_PATH)
-
-from langchain_qianwen import Qwen_v1
 
 
 class TestQwenLLM(TestCase):
