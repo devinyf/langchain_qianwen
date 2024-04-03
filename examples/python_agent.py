@@ -1,6 +1,6 @@
 from langchain.agents import AgentType
-from langchain.agents.agent_toolkits import create_python_agent
-from langchain.tools import PythonREPLTool
+from langchain_experimental.agents.agent_toolkits.python.base import create_python_agent
+from langchain_experimental.tools.python.tool import PythonREPLTool
 
 from langchain_qianwen import Qwen_v1
 
