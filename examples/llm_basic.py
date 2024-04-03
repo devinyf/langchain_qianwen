@@ -9,6 +9,7 @@ if __name__ == "__main__":
         callbacks=[StreamingStdOutCallbackHandler()],
     )
 
+    # pylint: disable=invalid-name
     question = "你好, 讲个50字的笑话吧"
     resp = llm(question)
     print("type: ", type(resp))

@@ -42,4 +42,3 @@ class TestQwenLLM(TestCase):
             response = llm(question)
 
             assert response == MOCK_STREAMING_RESPONSE
-

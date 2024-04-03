@@ -1,13 +1,13 @@
-from langchain.callbacks.manager import (CallbackManagerForLLMRun, AsyncCallbackManagerForLLMRun)
-from langchain_core.language_models.llms import create_base_retry_decorator
-from langchain.llms.base import BaseLLM
-from langchain.chat_models.base import BaseChatModel
 from http import HTTPStatus
 import asyncio
-
 import logging
-
 from typing import Optional, Union, Callable, Any, AsyncGenerator
+
+from langchain.callbacks.manager import (CallbackManagerForLLMRun, AsyncCallbackManagerForLLMRun)
+from langchain_core.language_models.llms import create_base_retry_decorator
+from langchain_core.language_models.llms import BaseLLM
+from langchain_core.language_models.chat_models import BaseChatModel
+
 
 logger = logging.getLogger(__name__)
 
@@ -66,6 +66,7 @@ def _create_retry_decorator(
         Union[AsyncCallbackManagerForLLMRun, CallbackManagerForLLMRun]
     ] = None,
 ) -> Callable[[Any], Any]:
+    # pylint: disable=import-outside-toplevel
     import dashscope
 
     errors = [
@@ -104,6 +105,7 @@ def response_text_format(stream_resp, cursor):
 
 
 def response_handler(response):
+    # pylint: disable=line-too-long
     if response.status_code == HTTPStatus.BAD_REQUEST and "contain inappropriate content" in response.message:
         response.status_code = HTTPStatus.OK
         response.output = {

@@ -4,7 +4,9 @@ from langchain.schema.runnable import RunnableParallel
 from langchain_qianwen import Qwen_v1
 
 if __name__ == "__main__":
+    # pylint: disable=invalid-name
     jock_template = "给我讲个有关 {topic} 的笑话"
+    # pylint: disable=invalid-name
     story_template = "写一个简短的关于 {story} 的故事"
 
     prompt1 = PromptTemplate.from_template(jock_template)

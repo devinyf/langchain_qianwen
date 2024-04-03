@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional, Iterator, AsyncIterator, Set, Union
 import logging
+from http import HTTPStatus
 
 from langchain.llms.base import BaseLLM
 from langchain.pydantic_v1 import Field, root_validator
@@ -10,8 +11,8 @@ from langchain.utils import get_from_dict_or_env
 from langchain.schema.output import GenerationChunk
 from langchain.callbacks.manager import (CallbackManagerForLLMRun, AsyncCallbackManagerForLLMRun)
 
-from .commons import completion_with_retry, acompletion_with_retry, response_text_format, response_plugin_format, response_handler
-from http import HTTPStatus
+from .commons import completion_with_retry, \
+    acompletion_with_retry, response_text_format, response_plugin_format, response_handler
 
 logger = logging.getLogger(__name__)
 
@@ -88,6 +89,7 @@ class BaseDashScope(BaseLLM):
         """Validate that api key and python package exists in environment."""
         get_from_dict_or_env(values, "dashscope_api_key", "DASHSCOPE_API_KEY")
         try:
+            # pylint: disable=import-outside-toplevel
             import dashscope
         except ImportError:
             raise ImportError(
@@ -242,11 +244,11 @@ class BaseDashScope(BaseLLM):
 
             for v in response["output"]["choices"]:
                 if self.plugins:
-                    tmpText = ""
+                    tmp_text = ""
                     for message in v["messages"]:
-                        tmpText += message["content"]
+                        tmp_text += message["content"]
                     choices.append({
-                        "text": tmpText,
+                        "text": tmp_text,
                         "finish_reason": v["finish_reason"]
                     })
                 else:
@@ -332,6 +334,7 @@ class BaseDashScope(BaseLLM):
         return LLMResult(generations=generations, llm_output=llm_output)
 
 
+# pylint: disable=invalid-name
 class Qwen_v1(BaseDashScope):
     def __new__(cls, **data: Any) -> Qwen_v1:
         return super().__new__(cls, **data)

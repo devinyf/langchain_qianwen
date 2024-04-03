@@ -10,6 +10,7 @@ if __name__ == "__main__":
         streaming=False,
     )
 
+    # pylint: disable=invalid-name
     question = "使用python 画一个y=x^2的函数图"
     resp = llm(question)
     print("resp: ", resp)

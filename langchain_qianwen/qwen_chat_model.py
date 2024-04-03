@@ -2,6 +2,10 @@ from __future__ import annotations
 
 from http import HTTPStatus
 import logging
+import asyncio
+from functools import partial
+from typing import (Dict, Any, Optional, List,
+                    Iterator, Tuple, Mapping, AsyncIterator)
 
 from langchain.chat_models.base import BaseChatModel
 from langchain.pydantic_v1 import Field, root_validator
@@ -20,14 +24,10 @@ from langchain.schema.messages import (
 )
 from langchain.adapters.openai import (convert_dict_to_message, convert_message_to_dict)
 
-import asyncio
-from functools import partial
 
 from .commons import (
     completion_with_retry, response_text_format, response_handler)
 
-from typing import (Dict, Any, Optional, List,
-                    Iterator, Tuple, Mapping, AsyncIterator)
 
 logger = logging.getLogger(__name__)
 
@@ -59,6 +59,7 @@ def _stream_response_to_chat_generation_chunk(
     )
 
 
+# pylint: disable=invalid-name
 class ChatQwen_v1(BaseChatModel):
     @property
     def lc_secrets(self) -> Dict[str, str]:
@@ -100,6 +101,7 @@ class ChatQwen_v1(BaseChatModel):
         """Validate that api key and python package exists in environment."""
         get_from_dict_or_env(values, "dashscope_api_key", "DASHSCOPE_API_KEY")
         try:
+            # pylint: disable=import-outside-toplevel
             import dashscope
         except ImportError:
             raise ImportError(

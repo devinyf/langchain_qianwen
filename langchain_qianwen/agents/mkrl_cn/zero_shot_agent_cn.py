@@ -1,3 +1,4 @@
+from typing import Sequence, Optional, List, Any
 from langchain.agents.mrkl.base import ZeroShotAgent
 from langchain.tools.base import BaseTool
 from langchain.prompts import PromptTemplate
@@ -7,8 +8,6 @@ from langchain.agents.agent import AgentOutputParser, Agent
 from langchain.chains import LLMChain
 
 from .prompt import PREFIX, SUFFIX, FORMAT_INSTRUCTIONS
-
-from typing import Sequence, Optional, List, Any
 
 
 # 官方的 ZeroShotAgent 类 套壳, 用于定制中文 prompt
@@ -77,4 +76,3 @@ class ZeroShotAgentCN(ZeroShotAgent):
             output_parser=_output_parser,
             **kwargs,
         )
-
